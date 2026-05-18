@@ -1,450 +1,545 @@
-# =========================================================
-# Churn & Retention Dashboard
-# Streamlit recreation of the Tableau dashboard
-# =========================================================
-
-from pathlib import Path
-import numpy as np
-import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.express as px
+from pathlib import Path
 
+# --------------------------------------------------
+# PAGE CONFIG
+# --------------------------------------------------
 st.set_page_config(
-    page_title="Churn & Retention Dashboard",
-    page_icon="📊",
+    page_title="Churn & Retention Decision Dashboard",
     layout="wide"
 )
 
-# ---------------------------------------------------------
-# Styling
-# ---------------------------------------------------------
+DATA_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "processed"
+    / "churn_retention_clean.csv"
+)
+
+# --------------------------------------------------
+# LOAD DATA
+# --------------------------------------------------
+@st.cache_data
+def load_data():
+    try:
+        df = pd.read_csv(DATA_PATH)
+
+        date_columns = ["signup_date", "last_active_date", "churn_date"]
+        for col in date_columns:
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col], errors="coerce")
+
+        return df
+
+    except FileNotFoundError:
+        st.error(
+            "Dataset not found. Please confirm that `churn_retention_clean.csv` exists inside `data/processed/`."
+        )
+        st.stop()
+
+    except Exception as e:
+        st.error(f"Error loading dataset: {e}")
+        st.stop()
+
+
+df = load_data()
+
+# --------------------------------------------------
+# REQUIRED COLUMN VALIDATION
+# --------------------------------------------------
+required_columns = [
+    "customer_id",
+    "segment",
+    "plan_type",
+    "region",
+    "engagement_band",
+    "tenure_band",
+    "churn_flag",
+    "engagement_score",
+    "revenue_at_risk",
+    "last_active_date",
+    "churn_reason"
+]
+
+missing_columns = [col for col in required_columns if col not in df.columns]
+
+if missing_columns:
+    st.error(
+        "The dataset is missing the following required columns: "
+        + ", ".join(missing_columns)
+    )
+    st.stop()
+
+# --------------------------------------------------
+# DATA CLEANING SAFETY
+# --------------------------------------------------
+df["churn_flag"] = pd.to_numeric(df["churn_flag"], errors="coerce").fillna(0)
+df["engagement_score"] = pd.to_numeric(df["engagement_score"], errors="coerce").fillna(0)
+df["revenue_at_risk"] = pd.to_numeric(df["revenue_at_risk"], errors="coerce").fillna(0)
+
+df["segment"] = df["segment"].fillna("Unknown")
+df["plan_type"] = df["plan_type"].fillna("Unknown")
+df["region"] = df["region"].fillna("Unknown")
+df["engagement_band"] = df["engagement_band"].fillna("Unknown")
+df["tenure_band"] = df["tenure_band"].fillna("Unknown")
+df["churn_reason"] = df["churn_reason"].fillna("Not Provided")
+
+# --------------------------------------------------
+# CUSTOM CSS
+# --------------------------------------------------
 st.markdown(
     """
     <style>
-        .main {background-color: #ffffff;}
-        h1, h2, h3 {color: #2F5F9F;}
-        .kpi-card {
-            background: #f7f9fc;
-            border: 1px solid #e5e9f0;
-            border-radius: 10px;
-            padding: 14px 16px;
-            min-height: 110px;
-        }
-        .kpi-label {
-            color: #2F5F9F;
-            font-size: 18px;
-            line-height: 1.1;
-        }
-        .kpi-value {
-            color: #333333;
-            font-size: 28px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
-        .summary-box {
-            border-radius: 10px;
-            padding: 16px;
-            min-height: 190px;
-            font-size: 16px;
-            line-height: 1.55;
-        }
-        .insight {background-color:#e8f2ff; color:#0050a4;}
-        .action {background-color:#fff9db; color:#8a6400;}
-        .recommendation {background-color:#e6f7ed; color:#087b35;}
-        .decision {background-color:#fde7e9; color:#b4232f;}
+    .main-title {
+        font-size: 46px;
+        font-weight: 900;
+        color: #1f4e8c;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #4b5563;
+        font-size: 18px;
+        margin-bottom: 26px;
+    }
+
+    .section-title {
+        color: #1f2937;
+        font-size: 24px;
+        font-weight: 800;
+        margin-top: 14px;
+        margin-bottom: 10px;
+    }
+
+    .kpi-card {
+        background-color: #f8fafc;
+        border: 1px solid #d9e2ef;
+        border-radius: 16px;
+        padding: 18px;
+        text-align: center;
+        box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .kpi-label {
+        color: #3569ad;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .kpi-value {
+        color: #111827;
+        font-size: 29px;
+        font-weight: 900;
+    }
+
+    .insight-caption {
+        font-size: 14px;
+        color: #374151;
+        background-color: #f8fafc;
+        border-left: 4px solid #3569ad;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-top: -8px;
+        margin-bottom: 18px;
+    }
+
+    .summary-card {
+        border-radius: 16px;
+        padding: 18px;
+        min-height: 180px;
+        border: 1px solid #d6dee8;
+        box-shadow: 0px 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .impact-box {
+        background-color: #f8fafc;
+        border: 1px solid #d9e2ef;
+        border-radius: 16px;
+        padding: 18px;
+        margin-top: 10px;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ---------------------------------------------------------
-# Load Data
-# ---------------------------------------------------------
-@st.cache_data
-def load_data() -> pd.DataFrame:
-    possible_paths = [
-        Path("data/churn_retention.csv"),
-        Path("../data/churn_retention.csv"),
-        Path("data/churn & retention.csv"),
-        Path("../data/churn & retention.csv"),
-        Path("churn_retention.csv"),
-    ]
-
-    for path in possible_paths:
-        if path.exists():
-            return pd.read_csv(path)
-
-    st.error("Dataset not found. Place churn_retention.csv inside the data folder.")
-    st.stop()
-
-
-df = load_data()
-
-# ---------------------------------------------------------
-# Data Preparation for Dashboard
-# ---------------------------------------------------------
-df.columns = (
-    df.columns
-    .str.strip()
-    .str.lower()
-    .str.replace(" ", "_", regex=False)
-    .str.replace("-", "_", regex=False)
+# --------------------------------------------------
+# TITLE
+# --------------------------------------------------
+st.markdown(
+    '<div class="main-title">Churn & Retention Decision Dashboard</div>',
+    unsafe_allow_html=True
 )
 
-for date_col in ["signup_date", "last_active_date", "churn_date"]:
-    if date_col in df.columns:
-        df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
-
-numeric_cols = [
-    "tenure_days", "sessions_last_30d", "avg_session_duration",
-    "feature_usage_score", "engagement_score", "revenue", "lifetime_value", "churn"
-]
-for col in numeric_cols:
-    if col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-
-required = [
-    "customer_id", "signup_date", "last_active_date", "tenure_days", "segment",
-    "plan_type", "region", "device", "acquisition_channel", "engagement_score",
-    "revenue", "churn", "churn_reason"
-]
-missing = [c for c in required if c not in df.columns]
-if missing:
-    st.error(f"Missing required columns: {missing}")
-    st.write("Available columns:", list(df.columns))
-    st.stop()
-
-# Clean categories
-for col in ["segment", "plan_type", "region", "device", "acquisition_channel", "churn_reason"]:
-    df[col] = df[col].fillna("Unknown").astype(str)
-
-# Clean numeric values
-for col in ["tenure_days", "engagement_score", "revenue", "lifetime_value", "churn"]:
-    df[col] = df[col].fillna(df[col].median())
-
-# Feature engineering used by the dashboard
-if "engagement_band" not in df.columns:
-    df["engagement_band"] = pd.cut(
-        df["engagement_score"],
-        bins=[-1, 25, 50, 100],
-        labels=["Low Engagement", "Medium Engagement", "High Engagement"]
-    ).astype(str)
-
-if "tenure_band" not in df.columns:
-    df["tenure_band"] = pd.cut(
-        df["tenure_days"],
-        bins=[-1, 30, 90, 180, np.inf],
-        labels=["0–30 Days", "31–90 Days", "91–180 Days", "181+ Days"]
-    ).astype(str)
-
-df["churn"] = df["churn"].astype(int)
-df["retention_flag"] = 1 - df["churn"]
-df["revenue_at_risk"] = df["revenue"] * df["churn"]
-df["dashboard_date"] = df["churn_date"].fillna(df["last_active_date"]).fillna(df["signup_date"])
-
-# ---------------------------------------------------------
-# Sidebar Filters
-# ---------------------------------------------------------
-st.sidebar.header("Dashboard Filters")
-
-def multiselect_filter(label, column):
-    values = sorted(df[column].dropna().astype(str).unique())
-    return st.sidebar.multiselect(label, values, default=values)
-
-channel_filter = multiselect_filter("Channel", "acquisition_channel")
-device_filter = multiselect_filter("Device", "device")
-engagement_filter = multiselect_filter("Engagement Band", "engagement_band")
-plan_filter = multiselect_filter("Plan Type", "plan_type")
-region_filter = multiselect_filter("Region", "region")
-segment_filter = multiselect_filter("Segment", "segment")
-
-date_min = df["dashboard_date"].min().date()
-date_max = df["dashboard_date"].max().date()
-date_range = st.sidebar.date_input("Date", value=(date_min, date_max), min_value=date_min, max_value=date_max)
-
-filtered_df = df[
-    df["acquisition_channel"].astype(str).isin(channel_filter)
-    & df["device"].astype(str).isin(device_filter)
-    & df["engagement_band"].astype(str).isin(engagement_filter)
-    & df["plan_type"].astype(str).isin(plan_filter)
-    & df["region"].astype(str).isin(region_filter)
-    & df["segment"].astype(str).isin(segment_filter)
-].copy()
-
-if isinstance(date_range, tuple) and len(date_range) == 2:
-    start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
-    filtered_df = filtered_df[
-        (filtered_df["dashboard_date"] >= start_date)
-        & (filtered_df["dashboard_date"] <= end_date)
-    ]
-
-if filtered_df.empty:
-    st.warning("No records match the selected filters.")
-    st.stop()
-
-# ---------------------------------------------------------
-# Helper Functions
-# ---------------------------------------------------------
-def pct(x):
-    return f"{x:.2f}%"
-
-def money(x):
-    return f"${x:,.0f}"
-
-def kpi_card(label, value):
-    st.markdown(
-        f"""
-        <div class='kpi-card'>
-            <div class='kpi-label'>{label}</div>
-            <div class='kpi-value'>{value}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-def bar_label(ax, fmt="{:.2f}%", horizontal=False):
-    for patch in ax.patches:
-        if horizontal:
-            value = patch.get_width()
-            ax.text(value + max(1, value * 0.02), patch.get_y() + patch.get_height()/2, fmt.format(value), va="center", fontsize=9, fontweight="bold")
-        else:
-            value = patch.get_height()
-            ax.text(patch.get_x() + patch.get_width()/2, value, fmt.format(value), ha="center", va="bottom", fontsize=9, fontweight="bold")
-
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
 st.markdown(
     """
-    <h1 style='text-align:center;'>Churn and Retention Dashboard</h1>
-    <p style='text-align:center; color:#4a4a4a;'>Customer retention intelligence, revenue-risk exposure, engagement behavior, and executive decision support.</p>
+    <div class="subtitle">
+    Business + product analytics dashboard for monitoring churn risk, retention behavior,
+    engagement decline, and revenue exposure to support executive retention decisions.
+    </div>
     """,
     unsafe_allow_html=True
 )
 
-# ---------------------------------------------------------
-# KPI Cards
-# ---------------------------------------------------------
-total_customers = filtered_df["customer_id"].nunique()
-churn_rate = filtered_df["churn"].mean() * 100
-retention_rate = 100 - churn_rate
-revenue_at_risk = filtered_df["revenue_at_risk"].sum()
-avg_engagement = filtered_df["engagement_score"].mean()
+# --------------------------------------------------
+# SIDEBAR FILTERS
+# --------------------------------------------------
+with st.sidebar:
+    st.header("Dashboard Filters")
 
+    min_date = df["last_active_date"].min()
+    max_date = df["last_active_date"].max()
+
+    if pd.notna(min_date) and pd.notna(max_date):
+        date_range = st.date_input(
+            "Last Active Date Range",
+            value=(min_date.date(), max_date.date()),
+            min_value=min_date.date(),
+            max_value=max_date.date()
+        )
+    else:
+        date_range = None
+
+    segment = st.multiselect(
+        "Segment",
+        sorted(df["segment"].unique()),
+        default=sorted(df["segment"].unique())
+    )
+
+    plan = st.multiselect(
+        "Plan Type",
+        sorted(df["plan_type"].unique()),
+        default=sorted(df["plan_type"].unique())
+    )
+
+    region = st.multiselect(
+        "Region",
+        sorted(df["region"].unique()),
+        default=sorted(df["region"].unique())
+    )
+
+    engagement = st.multiselect(
+        "Engagement Band",
+        sorted(df["engagement_band"].unique()),
+        default=sorted(df["engagement_band"].unique())
+    )
+
+# --------------------------------------------------
+# FILTER DATA
+# --------------------------------------------------
+filtered = df[
+    df["segment"].isin(segment)
+    & df["plan_type"].isin(plan)
+    & df["region"].isin(region)
+    & df["engagement_band"].isin(engagement)
+].copy()
+
+if date_range and len(date_range) == 2:
+    start_date, end_date = date_range
+    filtered = filtered[
+        (filtered["last_active_date"] >= pd.to_datetime(start_date))
+        & (filtered["last_active_date"] <= pd.to_datetime(end_date))
+    ]
+
+if filtered.empty:
+    st.warning("No data matches the selected filters. Please adjust your filter selections.")
+    st.stop()
+
+# --------------------------------------------------
+# DOWNLOAD FILTERED DATA
+# --------------------------------------------------
+st.download_button(
+    label="Download Filtered Dataset",
+    data=filtered.to_csv(index=False),
+    file_name="filtered_churn_retention_data.csv",
+    mime="text/csv"
+)
+
+# --------------------------------------------------
+# KPI CALCULATIONS
+# --------------------------------------------------
+total_customers = filtered["customer_id"].nunique()
+churn_rate = filtered["churn_flag"].mean()
+retention_rate = 1 - churn_rate
+revenue_at_risk = filtered["revenue_at_risk"].sum()
+avg_engagement = filtered["engagement_score"].mean()
+churned_customers = filtered.loc[filtered["churn_flag"] == 1, "customer_id"].nunique()
+
+# --------------------------------------------------
+# KPI CARDS
+# --------------------------------------------------
 k1, k2, k3, k4, k5 = st.columns(5)
-with k1: kpi_card("Total<br>Customers", f"{total_customers:,.0f}")
-with k2: kpi_card("Churn<br>Rate", pct(churn_rate))
-with k3: kpi_card("Retention<br>Rate", pct(retention_rate))
-with k4: kpi_card("Revenue at<br>Risk", money(revenue_at_risk))
-with k5: kpi_card("Avg<br>Engagement", f"{avg_engagement:.2f}")
 
-st.write("")
+metrics = [
+    ("Total Customers", f"{total_customers:,.0f}"),
+    ("Churn Rate", f"{churn_rate:.2%}"),
+    ("Retention Rate", f"{retention_rate:.2%}"),
+    ("Revenue at Risk", f"${revenue_at_risk:,.0f}"),
+    ("Avg Engagement", f"{avg_engagement:.2f}")
+]
 
-# ---------------------------------------------------------
-# Row 1 Visuals
-# ---------------------------------------------------------
+for col, (label, value) in zip([k1, k2, k3, k4, k5], metrics):
+    with col:
+        st.markdown(
+            f"""
+            <div class="kpi-card">
+                <div class="kpi-label">{label}</div>
+                <div class="kpi-value">{value}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+st.markdown("---")
+
+# --------------------------------------------------
+# VISUAL SECTION
+# --------------------------------------------------
+st.markdown('<div class="section-title">Retention Risk & Product Health Visuals</div>', unsafe_allow_html=True)
+
 row1_col1, row1_col2, row1_col3 = st.columns(3)
 
 with row1_col1:
-    st.subheader("Churn Trend")
-    trend = (
-        filtered_df.assign(month=filtered_df["dashboard_date"].dt.to_period("M").dt.to_timestamp())
-        .groupby("month")["churn"]
-        .mean()
-        .mul(100)
-        .reset_index(name="churn_rate")
-        .sort_values("month")
+    trend = filtered.dropna(subset=["last_active_date"]).copy()
+
+    if trend.empty:
+        st.info("No valid date data available for churn trend.")
+    else:
+        trend["month"] = trend["last_active_date"].dt.to_period("M").dt.to_timestamp()
+        trend_df = trend.groupby("month", as_index=False)["churn_flag"].mean()
+
+        fig = px.line(
+            trend_df,
+            x="month",
+            y="churn_flag",
+            title="Monthly Churn Trend",
+            markers=True
+        )
+        fig.update_yaxes(tickformat=".0%", title=None, showgrid=False)
+        fig.update_xaxes(title=None, showgrid=False)
+        fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white")
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Monthly churn movement identifies when customer loss accelerates and where retention review should begin.</div>',
+        unsafe_allow_html=True
     )
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(trend["month"], trend["churn_rate"], marker="o", linewidth=2)
-    ax.axhline(churn_rate, linewidth=1, linestyle="--")
-    ax.text(trend["month"].min(), churn_rate + 0.4, "Average", fontsize=9)
-    ax.set_ylabel("Churn Rate")
-    ax.set_xlabel("")
-    ax.set_ylim(0, max(45, trend["churn_rate"].max() + 5))
-    ax.grid(axis="y", alpha=0.25)
-    st.pyplot(fig, use_container_width=True)
 
 with row1_col2:
-    st.subheader("Segment Churn Rate")
-    segment = filtered_df.groupby("segment")["churn"].mean().mul(100).sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(6, 4))
-    segment.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Churn Rate")
-    ax.set_xlabel("")
-    ax.set_ylim(0, max(35, segment.max() + 5))
-    bar_label(ax)
-    st.pyplot(fig, use_container_width=True)
+    segment_df = (
+        filtered.groupby("segment", as_index=False)["churn_flag"]
+        .mean()
+        .sort_values("churn_flag", ascending=False)
+    )
+
+    fig = px.bar(
+        segment_df,
+        x="segment",
+        y="churn_flag",
+        title="Churn Rate by Segment",
+        text=segment_df["churn_flag"].map(lambda x: f"{x:.1%}")
+    )
+    fig.update_yaxes(tickformat=".0%", title=None, showgrid=False)
+    fig.update_xaxes(title=None, showgrid=False)
+    fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white", showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Segment-level churn helps prioritize retention investment toward customer groups with the highest risk.</div>',
+        unsafe_allow_html=True
+    )
 
 with row1_col3:
-    st.subheader("Churn by Tenure")
-    tenure_order = ["181+ Days", "91–180 Days", "31–90 Days", "0–30 Days"]
-    tenure = filtered_df.groupby("tenure_band")["churn"].mean().mul(100).reindex(tenure_order).dropna()
-    fig, ax = plt.subplots(figsize=(6, 4))
-    tenure.plot(kind="barh", ax=ax)
-    ax.set_xlabel("Churn Rate")
-    ax.set_ylabel("")
-    ax.set_xlim(0, max(45, tenure.max() + 8))
-    bar_label(ax, horizontal=True)
-    st.pyplot(fig, use_container_width=True)
+    tenure_df = (
+        filtered.groupby("tenure_band", as_index=False, observed=False)["churn_flag"]
+        .mean()
+        .sort_values("churn_flag", ascending=True)
+    )
 
-# ---------------------------------------------------------
-# Row 2 Visuals
-# ---------------------------------------------------------
+    fig = px.bar(
+        tenure_df,
+        y="tenure_band",
+        x="churn_flag",
+        orientation="h",
+        title="Churn Rate by Tenure",
+        text=tenure_df["churn_flag"].map(lambda x: f"{x:.1%}")
+    )
+    fig.update_xaxes(tickformat=".0%", title=None, showgrid=False)
+    fig.update_yaxes(title=None, showgrid=False)
+    fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white", showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Tenure churn shows whether retention risk is concentrated during onboarding or after longer product use.</div>',
+        unsafe_allow_html=True
+    )
+
 row2_col1, row2_col2, row2_col3 = st.columns(3)
 
 with row2_col1:
-    st.subheader("Engagement vs Churn")
-    engagement_order = ["Low Engagement", "Medium Engagement", "High Engagement"]
-    engagement = filtered_df.groupby("engagement_band")["churn"].mean().mul(100).reindex(engagement_order).dropna()
-    fig, ax = plt.subplots(figsize=(6, 4))
-    engagement.plot(kind="barh", ax=ax)
-    ax.axvline(churn_rate, linewidth=1, linestyle="--")
-    ax.text(churn_rate + 0.2, -0.35, "Average", fontsize=9)
-    ax.set_xlabel("Churn Rate")
-    ax.set_ylabel("")
-    ax.set_xlim(0, max(45, engagement.max() + 8))
-    bar_label(ax, horizontal=True)
-    st.pyplot(fig, use_container_width=True)
+    engagement_df = (
+        filtered.groupby("engagement_band", as_index=False, observed=False)["churn_flag"]
+        .mean()
+        .sort_values("churn_flag", ascending=True)
+    )
+
+    fig = px.bar(
+        engagement_df,
+        y="engagement_band",
+        x="churn_flag",
+        orientation="h",
+        title="Engagement Band vs Churn",
+        text=engagement_df["churn_flag"].map(lambda x: f"{x:.1%}")
+    )
+    fig.update_xaxes(tickformat=".0%", title=None, showgrid=False)
+    fig.update_yaxes(title=None, showgrid=False)
+    fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white", showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Engagement is a leading churn signal that helps teams intervene before customers fully disengage.</div>',
+        unsafe_allow_html=True
+    )
 
 with row2_col2:
-    st.subheader("Revenue Exposure")
-    revenue = filtered_df.groupby("segment")["revenue_at_risk"].sum().sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(6, 4))
-    revenue.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Revenue at Risk")
-    ax.set_xlabel("")
-    ax.ticklabel_format(style="plain", axis="y")
-    for patch in ax.patches:
-        value = patch.get_height()
-        ax.text(patch.get_x() + patch.get_width()/2, value, money(value), ha="center", va="bottom", fontsize=9, fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    revenue_df = (
+        filtered.groupby("engagement_band", as_index=False, observed=False)["revenue_at_risk"]
+        .sum()
+        .sort_values("revenue_at_risk", ascending=False)
+    )
+
+    fig = px.bar(
+        revenue_df,
+        x="engagement_band",
+        y="revenue_at_risk",
+        title="Revenue at Risk by Engagement",
+        text=revenue_df["revenue_at_risk"].map(lambda x: f"${x/1000:.1f}K")
+    )
+    fig.update_yaxes(title=None, showgrid=False)
+    fig.update_xaxes(title=None, showgrid=False)
+    fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white", showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Revenue exposure connects churn risk to financial impact, helping leadership prioritize high-value retention actions.</div>',
+        unsafe_allow_html=True
+    )
 
 with row2_col3:
-    st.subheader("Churn Reasons")
-    reasons = filtered_df[filtered_df["churn"] == 1]["churn_reason"].value_counts().sort_values()
-    fig, ax = plt.subplots(figsize=(6, 4))
-    reasons.plot(kind="barh", ax=ax)
-    ax.set_xlabel("Customers")
-    ax.set_ylabel("")
-    for patch in ax.patches:
-        value = patch.get_width()
-        ax.text(value + 1, patch.get_y() + patch.get_height()/2, f"{int(value)}", va="center", fontsize=9, fontweight="bold")
-    st.pyplot(fig, use_container_width=True)
+    reasons = (
+        filtered[filtered["churn_flag"] == 1]
+        .groupby("churn_reason", as_index=False)["customer_id"]
+        .count()
+        .rename(columns={"customer_id": "churned_customers"})
+        .sort_values("churned_customers", ascending=True)
+    )
 
-# ---------------------------------------------------------
-# Additional Visuals
-# ---------------------------------------------------------
-st.divider()
-st.subheader("Additional Retention Views")
+    if reasons.empty:
+        st.info("No churned customers available for churn reason analysis.")
+    else:
+        fig = px.bar(
+            reasons,
+            y="churn_reason",
+            x="churned_customers",
+            orientation="h",
+            title="Top Churn Reasons",
+            text="churned_customers"
+        )
+        fig.update_xaxes(title=None, showgrid=False)
+        fig.update_yaxes(title=None, showgrid=False)
+        fig.update_layout(height=360, title_x=0.5, plot_bgcolor="white", showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
 
-extra1, extra2, extra3 = st.columns(3)
+    st.markdown(
+        '<div class="insight-caption"><b>Insight:</b> Churn reasons identify the product, service, or experience issues most connected to customer loss.</div>',
+        unsafe_allow_html=True
+    )
 
-with extra1:
-    st.markdown("**Churn by Device**")
-    device = filtered_df.groupby("device")["churn"].mean().mul(100).sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(5, 3.4))
-    device.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Churn Rate")
-    ax.set_xlabel("")
-    bar_label(ax)
-    st.pyplot(fig, use_container_width=True)
+st.markdown("---")
 
-with extra2:
-    st.markdown("**Churn by Channel**")
-    channel = filtered_df.groupby("acquisition_channel")["churn"].mean().mul(100).sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(5, 3.4))
-    channel.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Churn Rate")
-    ax.set_xlabel("")
-    bar_label(ax)
-    st.pyplot(fig, use_container_width=True)
+# --------------------------------------------------
+# MEASURABLE BUSINESS IMPACT
+# --------------------------------------------------
+st.markdown('<div class="section-title">Measurable Business Impact</div>', unsafe_allow_html=True)
 
-with extra3:
-    st.markdown("**Revenue Risk by Region**")
-    region = filtered_df.groupby("region")["revenue_at_risk"].sum().sort_values(ascending=False)
-    fig, ax = plt.subplots(figsize=(5, 3.4))
-    region.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Revenue at Risk")
-    ax.set_xlabel("")
-    st.pyplot(fig, use_container_width=True)
+estimated_save_rate = 0.15
+potential_revenue_saved = revenue_at_risk * estimated_save_rate
 
-# ---------------------------------------------------------
-# Detail Table
-# ---------------------------------------------------------
-st.divider()
-st.subheader("Customer Detail Table")
-
-detail_cols = [
-    "customer_id", "segment", "region", "plan_type", "device", "acquisition_channel",
-    "engagement_band", "tenure_band", "engagement_score", "revenue",
-    "revenue_at_risk", "churn", "churn_reason"
-]
-st.dataframe(
-    filtered_df[detail_cols].sort_values(["revenue_at_risk", "engagement_score"], ascending=[False, True]),
-    use_container_width=True,
-    height=350
+st.markdown(
+    f"""
+    <div class="impact-box">
+        <b>Business Impact Estimate:</b><br><br>
+        This dashboard identifies <b>{churned_customers:,.0f}</b> churned customers and 
+        <b>${revenue_at_risk:,.0f}</b> in revenue at risk across the selected customer base.
+        If targeted retention actions recover only <b>15%</b> of exposed revenue, the business could protect approximately 
+        <b>${potential_revenue_saved:,.0f}</b> in revenue.
+        <br><br>
+        <b>Decision Value:</b> The dashboard helps product, customer success, and leadership teams prioritize retention
+        investment by customer segment, engagement behavior, tenure, churn reason, and financial exposure.
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
-# ---------------------------------------------------------
-# Insight, Action, Recommendation, Decision
-# ---------------------------------------------------------
-st.divider()
-st.markdown("<h2 style='color:#303241;'>Executive Decision Summary</h2>", unsafe_allow_html=True)
+st.markdown("---")
 
-low_engagement_churn = filtered_df[filtered_df["engagement_band"].astype(str) == "Low Engagement"]["churn"].mean() * 100
-if np.isnan(low_engagement_churn):
-    low_engagement_churn = churn_rate
-
-top_segment = filtered_df.groupby("segment")["revenue_at_risk"].sum().sort_values(ascending=False).index[0]
-top_reason = filtered_df[filtered_df["churn"] == 1]["churn_reason"].value_counts().index[0]
-top_region = filtered_df.groupby("region")["revenue_at_risk"].sum().sort_values(ascending=False).index[0]
+# --------------------------------------------------
+# EXECUTIVE DECISION SUMMARY
+# --------------------------------------------------
+st.markdown('<div class="section-title">Executive Decision Summary</div>', unsafe_allow_html=True)
 
 s1, s2, s3, s4 = st.columns(4)
 
-with s1:
-    st.markdown("### 🔎 Insight")
-    st.markdown(
-        f"""
-        <div class='summary-box insight'>
-        Low-engagement customers show a <b>{low_engagement_churn:.2f}% churn rate</b>,
-        making engagement decline one of the strongest early warning signals for retention risk.
-        </div>
-        """,
-        unsafe_allow_html=True
+cards = [
+    (
+        "INSIGHT",
+        "Low-engagement and high-risk customer groups show measurable churn exposure and should be treated as early-warning retention segments.",
+        "#e8f3ff"
+    ),
+    (
+        "ACTION",
+        "Monitor churn rate, engagement band, tenure, churn reason, and revenue exposure weekly to detect retention deterioration earlier.",
+        "#fff7dc"
+    ),
+    (
+        "RECOMMENDATION",
+        "Launch targeted retention campaigns for high-value customers with declining engagement before increasing acquisition spend.",
+        "#e7f7ed"
+    ),
+    (
+        "DECISION",
+        "Prioritize retention investment toward the highest-risk, highest-value segments to reduce preventable churn and protect revenue.",
+        "#fdecef"
     )
+]
 
-with s2:
-    st.markdown("### ⚙️ Action")
-    st.markdown(
-        f"""
-        <div class='summary-box action'>
-        Monitor customers with declining sessions, low feature usage, short tenure, and churn reason patterns such as <b>{top_reason}</b>.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+for col, (title, body, color) in zip([s1, s2, s3, s4], cards):
+    with col:
+        st.markdown(
+            f"""
+            <div class="summary-card" style="background-color:{color};">
+                <h4 style="text-align:center; color:#111827;">{title}</h4>
+                <p style="text-align:center; color:#374151;">{body}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-with s3:
-    st.markdown("### ✅ Recommendation")
-    st.markdown(
-        f"""
-        <div class='summary-box recommendation'>
-        Launch targeted retention campaigns for <b>{top_segment}</b> customers and prioritize revenue-risk controls in the <b>{top_region}</b> region.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+st.markdown("---")
 
-with s4:
-    st.markdown("### ⭐ Decision")
-    st.markdown(
-        """
-        <div class='summary-box decision'>
-        Prioritize retention investment on low-engagement, high-value customers before increasing acquisition spend.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# --------------------------------------------------
+# DATA PREVIEW
+# --------------------------------------------------
+with st.expander("View Filtered Data Preview"):
+    st.dataframe(filtered.head(100), use_container_width=True)
 
-st.caption("Dashboard focus: churn monitoring, retention intelligence, engagement analysis, revenue-risk exposure, and executive decision support.")
+# --------------------------------------------------
+# FOOTER
+# --------------------------------------------------
+st.caption(
+    "Built with Streamlit, Python, Pandas, and Plotly to support churn monitoring, retention prioritization, product analytics, and executive decision-making."
+)
