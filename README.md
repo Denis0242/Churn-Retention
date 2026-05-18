@@ -24,32 +24,56 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 # Dashboard Preview
 
+# Dashboard Preview
+
 ## Main Dashboard
 
-![Dashboard Preview](screenshots/dashboard_preview.png)
+<p align="center">
+  <img src="screenshots/dashboard_preview.png" width="100%">
+</p>
 
-### KPI Performance Overview
+---
 
-![KPI Cards](screenshots/kpi_cards.png)
+## KPI Performance Overview
 
-### Customer Churn by Segment
+<p align="center">
+  <img src="screenshots/kpi_cards.png" width="78%">
+</p>
 
-![Churn Segment](screenshots/churn_segment.png)
+**Business Purpose:** Monitor churn KPIs, retention performance, engagement levels, and revenue exposure for executive decision-making.
 
-### Engagement vs Churn Analysis
+---
 
-![Engagement vs Churn](screenshots/engagement_vs_churn.png)
+## Customer Churn by Segment
 
-### Key Dashboard Highlights
+<p align="center">
+  <img src="screenshots/churn_segment.png" width="78%">
+</p>
+
+**Business Purpose:** Identify customer segments with elevated churn risk to prioritize retention intervention.
+
+---
+
+## Engagement vs Churn Analysis
+
+<p align="center">
+  <img src="screenshots/engagement_vs_churn.png" width="78%">
+</p>
+
+**Business Purpose:** Detect customer engagement behaviors associated with elevated churn risk.
+
+---
+
+## Key Dashboard Highlights
 
 The dashboard helps stakeholders quickly evaluate:
 
-* **Customer churn risk** across customer segments
-* **Revenue exposure** linked to churned customers
-* **Retention performance** across engagement levels
-* **Customer behavior patterns** influencing churn
-* **Product and engagement opportunities** to improve customer stickiness
-* **Retention prioritization** for high-risk customers
+✅ Customer churn risk across customer segments  
+✅ Revenue exposure linked to churned customers  
+✅ Retention performance across engagement levels  
+✅ Customer behavior patterns influencing churn  
+✅ Product engagement opportunities to improve retention  
+✅ High-risk customer prioritization before acquisition spend
 
 ---
 
