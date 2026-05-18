@@ -24,43 +24,39 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 # Dashboard Preview
 
-# Dashboard Preview
-
 ## Main Dashboard
 
-<p align="center">
-  <img src="screenshots/dashboard_preview.png" width="100%">
-</p>
+![Dashboard Preview](screenshots/dashboard_preview.png)
 
 ---
 
-## KPI Performance Overview
+## KPI Cards
 
-<p align="center">
-  <img src="screenshots/kpi_cards.png" width="78%">
-</p>
-
-**Business Purpose:** Monitor churn KPIs, retention performance, engagement levels, and revenue exposure for executive decision-making.
+![KPI Cards](screenshots/kpi_cards.png)
 
 ---
 
-## Customer Churn by Segment
+## Churn Trend
 
-<p align="center">
-  <img src="screenshots/churn_segment.png" width="78%">
-</p>
-
-**Business Purpose:** Identify customer segments with elevated churn risk to prioritize retention intervention.
+![Churn Trend](screenshots/churn_trend.png)
 
 ---
 
-## Engagement vs Churn Analysis
+## Engagement vs Churn
 
-<p align="center">
-  <img src="screenshots/engagement_vs_churn.png" width="78%">
-</p>
+![Engagement vs Churn](screenshots/engagement_vs_churn.png)
 
-**Business Purpose:** Detect customer engagement behaviors associated with elevated churn risk.
+---
+
+## Churn by Tenure
+
+![Churn by Tenure](screenshots/churn_by_tenure.png)
+
+---
+
+## Churn Reasons
+
+![Churn Reasons](screenshots/churn_reasons.png)
 
 ---
 
@@ -68,12 +64,13 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 The dashboard helps stakeholders quickly evaluate:
 
-✅ Customer churn risk across customer segments  
-✅ Revenue exposure linked to churned customers  
-✅ Retention performance across engagement levels  
-✅ Customer behavior patterns influencing churn  
-✅ Product engagement opportunities to improve retention  
-✅ High-risk customer prioritization before acquisition spend
+* **Customer churn risk** across customer segments
+* **Revenue exposure** linked to churned customers
+* **Retention performance** across engagement levels
+* **Customer behavior patterns** influencing churn
+* **Tenure-based churn patterns** across the customer lifecycle
+* **Top churn reasons** driving customer loss
+* **Retention prioritization** for high-risk customers
 
 ---
 
