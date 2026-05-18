@@ -24,13 +24,13 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 # Dashboard Preview
 
-## Main Dashboard
-
-![Dashboard Preview](screenshots/dashboard_preview.png)
-
----
-
 ## KPI Cards
+
+Crop the KPI card section from the dashboard and save as:
+
+```text
+screenshots/kpi_cards.png
+```
 
 ![KPI Cards](screenshots/kpi_cards.png)
 
@@ -38,11 +38,23 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 ## Churn Trend
 
+Crop the churn trend visual and save as:
+
+```text
+screenshots/churn_trend.png
+```
+
 ![Churn Trend](screenshots/churn_trend.png)
 
 ---
 
 ## Engagement vs Churn
+
+Crop the engagement chart and save as:
+
+```text
+screenshots/engagement_vs_churn.png
+```
 
 ![Engagement vs Churn](screenshots/engagement_vs_churn.png)
 
@@ -50,11 +62,23 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 ## Churn by Tenure
 
+Crop the tenure chart and save as:
+
+```text
+screenshots/churn_by_tenure.png
+```
+
 ![Churn by Tenure](screenshots/churn_by_tenure.png)
 
 ---
 
 ## Churn Reasons
+
+Crop the churn reasons chart and save as:
+
+```text
+screenshots/churn_reasons.png
+```
 
 ![Churn Reasons](screenshots/churn_reasons.png)
 
@@ -71,7 +95,6 @@ The dashboard helps stakeholders quickly evaluate:
 * **Tenure-based churn patterns** across the customer lifecycle
 * **Top churn reasons** driving customer loss
 * **Retention prioritization** for high-risk customers
-
 ---
 
 ## Business Problem
