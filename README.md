@@ -26,23 +26,11 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 ## KPI Cards
 
-Crop the KPI card section from the dashboard and save as:
-
-```text
-screenshots/kpi_cards.png
-```
-
 ![KPI Cards](screenshots/kpi_cards.png)
 
 ---
 
 ## Churn Trend
-
-Crop the churn trend visual and save as:
-
-```text
-screenshots/churn_trend.png
-```
 
 ![Churn Trend](screenshots/churn_trend.png)
 
@@ -50,35 +38,17 @@ screenshots/churn_trend.png
 
 ## Engagement vs Churn
 
-Crop the engagement chart and save as:
-
-```text
-screenshots/engagement_vs_churn.png
-```
-
 ![Engagement vs Churn](screenshots/engagement_vs_churn.png)
 
 ---
 
 ## Churn by Tenure
 
-Crop the tenure chart and save as:
-
-```text
-screenshots/churn_by_tenure.png
-```
-
 ![Churn by Tenure](screenshots/churn_by_tenure.png)
 
 ---
 
 ## Churn Reasons
-
-Crop the churn reasons chart and save as:
-
-```text
-screenshots/churn_reasons.png
-```
 
 ![Churn Reasons](screenshots/churn_reasons.png)
 
