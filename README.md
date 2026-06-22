@@ -83,7 +83,11 @@ Leadership teams need visibility into:
 Without proactive churn monitoring, organizations risk losing **high-value customers**, increasing acquisition dependency, and weakening long-term revenue performance.
 
 ---
+# Decision Support Use Case
 
+This dashboard helps business teams monitor customer retention performance, identify churn risk indicators, evaluate customer segments, and support data-driven decisions designed to improve retention, customer satisfaction, and long-term customer value.
+
+---
 ## KPI Goals
 
 | KPI             |    Value | Business Purpose                       |
