@@ -2,51 +2,102 @@
 
 ![Dashboard Preview](screenshots/dashboard_preview.png)
 
-## Executive Summary
+# Executive Summary
 
-This project analyzes **customer churn and retention behavior** to help business, product, and customer success teams identify high-risk customers, improve engagement, reduce preventable churn, and protect recurring revenue.
+This project analyzes customer churn and retention behavior to help business, product, and customer success teams identify high-risk customers, improve engagement, reduce preventable churn, and protect recurring revenue.
 
-Using **Tableau, SQL, Python, and Streamlit**, the analysis evaluates customer behavior across **engagement patterns, tenure, churn reasons, revenue exposure, and segment-level performance** to uncover where retention investment should be prioritized.
+Using Tableau, SQL, Python, and Streamlit, the analysis evaluates customer behavior across engagement patterns, tenure, churn reasons, revenue exposure, and customer segments to uncover where retention efforts should be prioritized.
 
-The dashboard enables stakeholders to move beyond descriptive reporting and into **decision-driven retention analytics** by identifying:
+The dashboard enables stakeholders to answer key business questions:
 
-* Which customer segments show the highest churn exposure
-* Which engagement behaviors indicate elevated churn risk
-* Which tenure bands demonstrate early warning signals
-* Which churn reasons deserve immediate intervention
-* Which high-value customers require proactive retention action
+* Which customer segments have the highest churn risk?
+* Which engagement behaviors indicate future churn?
+* Which tenure bands require intervention?
+* Which churn reasons deserve immediate attention?
+* Which customers create the largest revenue exposure?
 
-This analysis identified **$228,489 in observed revenue exposure**, highlighted opportunities capable of supporting an estimated **5–10% churn reduction**, and surfaced retention opportunities capable of improving customer stickiness by **3–7% through targeted engagement strategies**.
+The analysis identified:
 
-**Built using Tableau, SQL, Python, and Streamlit for business intelligence, KPI reporting, and product analytics decision-making.**
+* $228,489 in observed revenue exposure
+* Opportunities capable of supporting an estimated 5–10% churn reduction
+* Retention improvements of 3–7% through targeted engagement initiatives
+
+Built using Tableau, SQL, Python, and Streamlit for business intelligence, KPI reporting, and decision-support analytics.
 
 ---
 
-# Dashboard Preview
+# Business Problem
+
+Customer churn creates revenue leakage, reduces customer lifetime value, and weakens long-term business growth.
+
+Business leaders require visibility into:
+
+* High-risk customer segments
+* Churn warning signals
+* Customer engagement patterns
+* Revenue exposure from churn
+* Customer lifecycle risk
+* Retention opportunities
+
+Without proactive churn monitoring, organizations risk losing valuable customers, increasing acquisition costs, and reducing long-term profitability.
+
+---
+
+# Decision Support Use Case
+
+This dashboard helps business leaders, product teams, and customer success managers monitor retention performance, identify churn drivers, prioritize intervention efforts, and support data-driven decisions designed to improve customer satisfaction, retention, and lifetime value.
+
+---
+
+# KPIs
+
+| KPI             |    Value | Business Purpose                      |
+| --------------- | -------: | ------------------------------------- |
+| Total Customers |    1,200 | Measures customer base size           |
+| Churn Rate      |   73.50% | Measures customer loss risk           |
+| Retention Rate  |   26.50% | Measures customer stickiness          |
+| Revenue at Risk | $228,489 | Measures financial exposure           |
+| Avg Engagement  |    26.25 | Measures customer interaction quality |
+
+---
+
+# Dashboard Overview
+
+The dashboard consists of several analytical views designed to support retention decision-making:
+
+* Executive KPI Scorecards
+* Churn Trend Analysis
+* Engagement vs Churn Analysis
+* Churn by Tenure Analysis
+* Revenue Exposure Monitoring
+* Churn Reason Analysis
+* Customer Risk Prioritization
+
+These views provide a centralized retention analytics solution for leadership reporting and operational decision-making.
+
+---
+
+# Dashboard Screenshots
+
+## Dashboard Preview
+
+![Dashboard Preview](screenshots/dashboard_preview.png)
 
 ## KPI Cards
 
 ![KPI Cards](screenshots/kpi_cards.png)
 
----
-
 ## Churn Trend
 
 ![Churn Trend](screenshots/churn_trend.png)
-
----
 
 ## Engagement vs Churn
 
 ![Engagement vs Churn](screenshots/engagement_vs_churn.png)
 
----
-
 ## Churn by Tenure
 
 ![Churn by Tenure](screenshots/churn_by_tenure.png)
-
----
 
 ## Churn Reasons
 
@@ -54,74 +105,46 @@ This analysis identified **$228,489 in observed revenue exposure**, highlighted 
 
 ---
 
-## Key Dashboard Highlights
+# Key Insights
 
-The dashboard helps stakeholders quickly evaluate:
+### Insight 1
 
-* **Customer churn risk** across customer segments
-* **Revenue exposure** linked to churned customers
-* **Retention performance** across engagement levels
-* **Customer behavior patterns** influencing churn
-* **Tenure-based churn patterns** across the customer lifecycle
-* **Top churn reasons** driving customer loss
-* **Retention prioritization** for high-risk customers
----
+Customers with low engagement scores demonstrate significantly higher churn rates than highly engaged customers.
 
-## Business Problem
+### Insight 2
 
-Customer churn creates **revenue leakage, reduced customer lifetime value, and weaker long-term growth performance**.
+Specific customer segments contribute disproportionately to overall revenue exposure.
 
-Leadership teams need visibility into:
+### Insight 3
 
-* Which customer groups are most likely to churn
-* Which behavioral signals indicate elevated churn risk
-* Which engagement patterns influence retention
-* Which tenure groups show early-stage churn signals
-* Which churn reasons require product or customer success intervention
-* Where retention investment should happen before increasing acquisition spend
+Early-tenure customers show elevated churn risk, highlighting onboarding improvement opportunities.
 
-Without proactive churn monitoring, organizations risk losing **high-value customers**, increasing acquisition dependency, and weakening long-term revenue performance.
+### Insight 4
 
----
-# Decision Support Use Case
-
-This dashboard helps business teams monitor customer retention performance, identify churn risk indicators, evaluate customer segments, and support data-driven decisions designed to improve retention, customer satisfaction, and long-term customer value.
-
----
-## KPI Goals
-
-| KPI             |    Value | Business Purpose                       |
-| --------------- | -------: | -------------------------------------- |
-| Total Customers |    1,200 | Measures customer base size            |
-| Churn Rate      |   73.50% | Measures customer loss risk            |
-| Retention Rate  |   26.50% | Measures customer stickiness           |
-| Revenue at Risk | $228,489 | Measures financial exposure from churn |
-| Avg Engagement  |    26.25 | Measures product interaction quality   |
+A small number of churn reasons account for the majority of customer loss and require targeted intervention.
 
 ---
 
-## Dataset Overview
+# Data Dictionary
 
-| Item            | Description                                                   |
-| --------------- | ------------------------------------------------------------- |
-| Dataset         | Customer churn and retention dataset                          |
-| Rows            | 1,200                                                         |
-| Columns         | 26                                                            |
-| Date Fields     | signup_date, last_active_date, churn_date                     |
-| Core Dimensions | segment, plan_type, region, device, acquisition_channel       |
-| Core Metrics    | tenure_days, engagement_score, revenue, lifetime_value, churn |
-
-The dataset was used to evaluate **customer behavior, retention performance, churn drivers, and revenue exposure risk**.
+| Field            | Description                   |
+| ---------------- | ----------------------------- |
+| customer_id      | Unique customer identifier    |
+| segment          | Customer segment              |
+| plan_type        | Subscription plan             |
+| region           | Geographic region             |
+| engagement_score | Customer engagement metric    |
+| tenure_days      | Customer lifecycle duration   |
+| churn_flag       | Churn indicator               |
+| revenue_at_risk  | Revenue exposed to churn      |
+| risk_score       | Customer retention risk score |
+| risk_category    | Risk classification           |
 
 ---
 
-## EDA + Cleaning + Feature Engineering
+# EDA + Feature Engineering
 
-The project includes a structured **15-step Exploratory Data Analysis (EDA) and feature engineering process**:
-
-```text
-notebooks/eda_cleaning_feature_engineering.ipynb
-```
+The project includes a structured 15-step exploratory data analysis and feature engineering workflow.
 
 ### EDA Workflow
 
@@ -138,29 +161,29 @@ notebooks/eda_cleaning_feature_engineering.ipynb
 11. Feature Engineering
 12. Business Logic Validation
 13. Summary Statistics
-14. Final Clean Dataset Export
+14. Final Dataset Export
 15. Insight Summary
 
 ### Feature Engineering
 
-The following business-focused features were engineered:
+Engineered features include:
 
-* `churn_flag`
-* `retained_flag`
-* `engagement_band`
-* `tenure_band`
-* `revenue_at_risk`
-* `ltv_at_risk`
-* `risk_score`
-* `risk_category`
+* churn_flag
+* retained_flag
+* engagement_band
+* tenure_band
+* revenue_at_risk
+* ltv_at_risk
+* risk_score
+* risk_category
 
-These engineered metrics improve **retention prioritization, churn monitoring, and customer risk segmentation**.
+These metrics improve customer risk monitoring and retention prioritization.
 
 ---
 
-## Representative SQL Queries
+# Representative SQL Queries
 
-### 1. KPI Summary
+### KPI Summary
 
 ```sql
 SELECT
@@ -172,7 +195,7 @@ SELECT
 FROM churn_retention_clean;
 ```
 
-### 2. Segment Churn Rate
+### Segment Churn Analysis
 
 ```sql
 SELECT
@@ -185,231 +208,143 @@ GROUP BY segment
 ORDER BY churn_rate DESC;
 ```
 
-### 3. Engagement vs Churn
-
-```sql
-SELECT
-    engagement_band,
-    COUNT(DISTINCT customer_id) AS customers,
-    AVG(churn_flag) AS churn_rate,
-    AVG(engagement_score) AS avg_engagement,
-    SUM(revenue_at_risk) AS revenue_at_risk
-FROM churn_retention_clean
-GROUP BY engagement_band
-ORDER BY churn_rate DESC;
-```
-
-### 4. Churn Reasons
-
-```sql
-SELECT
-    churn_reason,
-    COUNT(*) AS churned_customers,
-    SUM(revenue_at_risk) AS revenue_at_risk
-FROM churn_retention_clean
-WHERE churn_flag = 1
-GROUP BY churn_reason
-ORDER BY churned_customers DESC;
-```
-
 ---
 
-## Metrics Engineering
+# Analytics Workflow
 
-| Metric          | Formula                                       | Business Meaning             |
-| --------------- | --------------------------------------------- | ---------------------------- |
-| Churn Rate      | Churned Customers / Total Customers           | Customer loss risk           |
-| Retention Rate  | 1 - Churn Rate                                | Customer stickiness          |
-| Revenue at Risk | Revenue × Churn Flag                          | Revenue exposed to churn     |
-| Engagement Band | Low / Medium / High                           | Customer interaction quality |
-| Risk Score      | Engagement + churn signal + revenue weighting | Prioritizes retention        |
-
----
-
-## Analytics Workflow
-
-```text
 Business Problem
-        ↓
+
+↓
+
 EDA + Cleaning
-        ↓
+
+↓
+
 Feature Engineering
-        ↓
+
+↓
+
 SQL Transformations
-        ↓
+
+↓
+
 Metrics Engineering
-        ↓
-Dashboard Build (Tableau)
-        ↓
-Streamlit Recreation
-        ↓
+
+↓
+
+Dashboard Development (Tableau)
+
+↓
+
+Streamlit Application
+
+↓
+
 Business Insights
-        ↓
-Recommendation
-        ↓
+
+↓
+
+Recommendations
+
+↓
+
 Executive Decision
-```
 
 ---
 
-## Product Insights
-
-### Insight
-
-Customers with **lower engagement behavior** demonstrate significantly higher churn exposure, while specific customer segments show elevated retention risk and stronger revenue vulnerability.
-
-### Action
-
-Customer Success and Product teams should monitor:
-
-* engagement score
-* session activity
-* tenure band
-* churn reason
-* revenue exposure
-* customer segment risk
-
-on a recurring basis to identify customers requiring intervention.
-
-### Recommendation
-
-Launch **targeted retention campaigns** focused on:
-
-* low-engagement customers
-* high-value customers
-* customers entering high-risk tenure bands
-* customers showing declining engagement trends
-
-before they transition into late-stage churn.
-
-### Decision
-
-Prioritize **retention investment before acquisition spending** by focusing resources on high-risk customer groups with meaningful revenue exposure.
-
----
-
-## Decision Framework
-
-| Decision Signal | Rule                                                | Business Action                  |
-| --------------- | --------------------------------------------------- | -------------------------------- |
-| High Risk       | High churn + low engagement + high revenue exposure | Immediate retention intervention |
-| Medium Risk     | Moderate churn or declining engagement              | Test engagement campaigns        |
-| Low Risk        | Stable retention and healthy engagement             | Maintain current experience      |
-| Review          | Mixed behavioral signals                            | Conduct additional investigation |
-
----
-
-## Executive Decision Summary
-
-### Insight
-
-Low-engagement customers and selected customer segments show the strongest churn exposure and represent elevated revenue risk.
-
-### Action
-
-Increase monitoring of engagement behavior, tenure patterns, and churn reasons while improving customer success intervention timing.
-
-### Recommendation
-
-Implement proactive retention campaigns for high-risk customers before churn risk escalates.
-
-### Decision
-
-Retention investment should be prioritized ahead of acquisition spend to improve long-term customer value and reduce revenue leakage.
-
----
-
-## Measurable Business Impact
+# Business Impact
 
 This dashboard enables stakeholders to:
 
-* Identify retention opportunities capable of reducing churn by an estimated **5–10%** through earlier intervention
-* Improve customer retention by an estimated **3–7%** through targeted engagement strategies
-* Protect **$228,489+ in observed revenue exposure** through proactive churn monitoring
-* Improve customer success prioritization using **segment, tenure, engagement, and risk scoring insights**
-* Reduce inefficient acquisition spending by prioritizing retention opportunities first
-* Strengthen business decision-making through KPI-driven churn analytics
+* Identify opportunities capable of reducing churn by an estimated 5–10%
+* Improve customer retention by an estimated 3–7%
+* Protect $228,489+ in observed revenue exposure
+* Improve customer success prioritization
+* Reduce inefficient acquisition spending
+* Strengthen KPI-driven decision-making
 
 ---
 
-## Streamlit App
+# Recommendations
 
-Run locally:
-
-```bash
-pip install -r requirements.txt
-streamlit run app/streamlit_app.py
-```
-
-The Streamlit application recreates the Tableau dashboard and includes:
-
-* KPI cards
-* churn monitoring
-* segment analysis
-* churn by tenure
-* engagement vs churn analysis
-* revenue exposure tracking
-* churn reason breakdown
-* executive decision summary
+Implement targeted retention initiatives focused on low-engagement and high-value customers before churn risk escalates in order to reduce revenue leakage and improve customer lifetime value.
 
 ---
 
-## Repo Architecture
+# Executive Decision Summary
+
+### Insight
+
+Low-engagement customers and selected customer segments show the highest churn exposure and represent meaningful revenue risk.
+
+### Action
+
+Increase monitoring of engagement behavior, tenure patterns, and churn drivers while strengthening intervention timing.
+
+### Recommendation
+
+Deploy proactive retention campaigns for high-risk customer groups before churn risk escalates.
+
+### Decision
+
+Prioritize retention investment before acquisition spending to improve customer lifetime value and reduce revenue leakage.
+
+---
+
+# Tools Used
+
+* SQL
+* Tableau
+* Python
+* Pandas
+* Streamlit
+* GitHub
+
+---
+
+# Repository Structure
 
 ```text
 churn-retention-dashboard/
 ├── app/
-│   └── streamlit_app.py
 ├── data/
-│   ├── raw/
-│   │   └── churn_retention.csv
-│   └── processed/
-│       └── churn_retention_clean.csv
-├── dashboard/
-│   └── tableau_dashboard_preview.png
-├── docs/
-│   ├── business_case.md
-│   ├── dashboard_guide.md
-│   ├── kpi_definitions.md
-│   └── automation_awareness.md
 ├── notebooks/
-│   └── eda_cleaning_feature_engineering.ipynb
 ├── screenshots/
-│   ├── dashboard_preview.png
-│   ├── kpi_cards.png
-│   ├── churn_segment.png
-│   └── engagement_vs_churn.png
 ├── sql/
-│   ├── 01_kpi_summary.sql
-│   ├── 02_segment_churn.sql
-│   ├── 03_engagement_revenue_risk.sql
-│   └── 04_churn_reasons.sql
-├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
 
 ---
 
-## Automation Awareness
+# How to Run the Project
 
-This project can be automated using:
+```bash
+git clone https://github.com/Denis0242/Churn-Retention
 
-* Scheduled SQL refreshes for KPI reporting
-* Python data cleaning pipelines for recurring refreshes
-* Prefect orchestration for retention monitoring
-* Streamlit Cloud deployment for stakeholder access
-* Tableau Public publishing for portfolio visibility
-* Snowflake or Redshift integration for scalable reporting
+pip install -r requirements.txt
+
+streamlit run app/streamlit_app.py
+```
 
 ---
 
-## Future Improvements
+# Future Improvements
 
-* Add churn prediction using Logistic Regression and Random Forest
-* Add retention cohort heatmap
-* Add customer-level churn risk scoring
-* Add A/B testing readout for retention interventions
-* Connect to Snowflake or Redshift for automated refreshes
-* Build executive alerting system for high-risk customers
-* Add experimentation reporting for retention strategies
+* Add churn prediction models
+* Add retention cohort analysis
+* Add customer-level churn scoring
+* Add A/B testing readouts
+* Connect to Snowflake or Redshift
+* Build executive alerting capabilities
+* Add experimentation reporting
+
+---
+
+# Disclaimer
+
+* Dataset is synthetic and created for portfolio purposes.
+* No real customer information is included.
+* Project developed for educational and demonstration purposes.
+* Business impact estimates are illustrative and intended to demonstrate analytical decision-making.
+
